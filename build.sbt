@@ -34,3 +34,5 @@ ghpages.settings
 git.remoteRepo := "git@github.com:willb/capriccio.git"
 
 lazy val capriccio = project in file(".")
+
+initialCommands in (Compile, console) += "import com.freevariable.capriccio._"
