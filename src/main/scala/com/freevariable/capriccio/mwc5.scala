@@ -21,7 +21,7 @@
 package com.freevariable.capriccio
 
 /**
- * State for a simple multiply-with-carry generator 
+ * State for a simple multiply-with-carry generator.
  * the algorithm is due to George Marsaglia:  http://groups.google.com/group/comp.lang.c/msg/e3c4ea1169e463ae
  */
 
@@ -31,5 +31,15 @@ case class MWC5State(x: Int, y: Int, z: Int, w: Int, v: Int) {
     val nv = (v ^ (v << 6)) ^ (t ^ (t ^ 13))
     val ny = z
     ((ny + ny + 1) * v, copy(x=y,y=z,z=w,w=v,v=nv))
+  }
+}
+
+object MWC5 {
+  val monad = _monad[MWC5State]
+
+  private def _monad[S] = new Monad[({type t[x] = State[S, x]})#t] {
+    def unit[A](a: => A): State[S, A] = State(s => (a, s))
+    def flatMap[A, B](st: State[S, A])(f: A => State[S, B]): State[S, B] =
+      st flatMap f
   }
 }

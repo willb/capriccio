@@ -40,16 +40,6 @@ import scala.language.higherKinds
   def map2[A, B, C](ma: F[A], mb: F[B])(f: (A, B) => C): F[C] =
     flatMap(ma)(a => map(mb)(b => f(a, b)))
 
-/*
-  def sequence[A](lma: List[F[A]]): F[List[A]] = lma match {
-    case Nil => unit(Nil)
-    case hd::tl => {
-      val seqTail = sequence(tl)
-      map2(hd, seqTail)((head, tail) => head::tail)
-    }
-  }
-*/
-
   def sequence[A](lma: List[F[A]]): F[List[A]] = 
     map(lma.foldLeft(unit[List[A]](Nil))((acc, ls) => map2(ls, acc)((head, tail) => head::tail)))(ls => ls.reverse)
 
