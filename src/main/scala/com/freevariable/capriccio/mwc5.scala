@@ -27,7 +27,7 @@ package com.freevariable.capriccio
 
 case class MWC5State(x: Int, y: Int, z: Int, w: Int, v: Int) extends PRNGState[MWC5State] {
   def shift: (Int, MWC5State) = {
-    val t = (x ^ (x >> 7))
+    val t = (x ^ (x >>> 7))
     val nv = (v ^ (v << 6)) ^ (t ^ (t ^ 13))
     val ny = z
     ((ny + ny + 1) * v, copy(x=y,y=z,z=w,w=v,v=nv))
