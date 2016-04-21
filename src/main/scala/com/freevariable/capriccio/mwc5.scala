@@ -25,7 +25,7 @@ package com.freevariable.capriccio
  * the algorithm is due to George Marsaglia:  http://groups.google.com/group/comp.lang.c/msg/e3c4ea1169e463ae
  */
 
-case class MWC5State(x: Int, y: Int, z: Int, w: Int, v: Int) {
+case class MWC5State(x: Int, y: Int, z: Int, w: Int, v: Int) extends PRNGState[MWC5State] {
   def shift: (Int, MWC5State) = {
     val t = (x ^ (x >> 7))
     val nv = (v ^ (v << 6)) ^ (t ^ (t ^ 13))
