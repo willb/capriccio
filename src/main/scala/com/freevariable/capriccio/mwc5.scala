@@ -25,12 +25,12 @@ package com.freevariable.capriccio
  * the algorithm is due to George Marsaglia:  http://groups.google.com/group/comp.lang.c/msg/e3c4ea1169e463ae
  */
 
-case class MWC5State(x: Long, y: Long, z: Long, w: Long, v: Long) extends PRNGState[MWC5State] {
+case class MWC5State(x: Int, y: Int, z: Int, w: Int, v: Int) extends PRNGState[MWC5State] {
   def shift: (Int, MWC5State) = {
-    val t = crop((x ^ (x >>> 7)))
-    val nv = crop((v ^ (v << 6)) ^ (t ^ (t << 13)))
-    val ny = crop(z)
-    (crop((ny + ny + 1) * nv).toInt, copy(x=crop(y),y=crop(z),z=crop(w),w=crop(v),v=crop(nv)))
+    val t = (x ^ (x >> 7))
+    val nv = (v ^ (v << 6)) ^ (t ^ (t << 13))
+    val ny = z
+    ((ny + ny + 1) * v, copy(x=y,y=z,z=w,w=v,v=nv))
   }
 
   @inline private [this] def crop(l: Long): Long = { l & 0xffffffff }
