@@ -21,7 +21,7 @@
 package com.freevariable.capriccio
 
 /**
- * State for a simple multiply-with-carry generator.
+ * State for a simple xorshift generator.
  * the algorithm is due to George Marsaglia:  http://groups.google.com/group/comp.lang.c/msg/e3c4ea1169e463ae
  */
 
