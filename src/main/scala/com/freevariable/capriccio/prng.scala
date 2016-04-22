@@ -21,19 +21,31 @@
 package com.freevariable.capriccio
 
 private [capriccio] object utils {
-  def int2bytes(i: Int) = (
+  @inline def int2bytes(i: Int) = (
     (i >>> 24 & 0xff).toByte,
     (i >>> 16 & 0xff).toByte,
     (i >>> 8 & 0xff).toByte,
     (i & 0xff).toByte
   )
+
+  @inline def int2byteStream(i: Int) =  {
+    (i >>> 24 & 0xff).toByte #::
+    (i >>> 16 & 0xff).toByte #::
+    (i >>> 8 & 0xff).toByte #::
+    (i & 0xff).toByte #:: Stream.empty
+  }
+
+  @inline def int2byteIt(i: Int) =  {
+    Array((i >>> 24 & 0xff).toByte, (i >>> 16 & 0xff).toByte, (i >>> 8 & 0xff).toByte, (i & 0xff).toByte).iterator
+  }
+
 }
 
 trait PRNG {
   def nextByte: Byte
 
   def nextInt = { 
-    ((0 to 3).map(_ => nextByte).foldLeft(0l) { (acc, b) => (acc << 8) | (b & 0xff) } & 0xfffffff).toInt
+    ((0 to 3).map(_ => nextByte).foldLeft(0) { (acc, b) => (acc << 8) | (b & 0xff) })
   }
 
   def nextLong = { 
@@ -62,8 +74,24 @@ case class PRNGStream[T](initialState: PRNGState[T]) {
   
   @inline private[this] def streamHelper(st: PRNGState[T]): Stream[Byte] = {
     val (next, nextState) = st.shift
-    val (b1, b2, b3, b4) = int2bytes(next)
-    b1 #:: b2 #:: b3 #:: b4 #:: streamHelper(nextState)
+    val bit = int2byteIt(next)
+    bit.toStream ++ streamHelper(nextState)
+  }
+}
+
+case class MutablePRNG[T](initialState: PRNGState[T]) extends PRNG {
+  import utils._
+
+  private var currentState = initialState
+  private var bytes: Iterator[Byte] = (Stream.empty.iterator)
+
+  def nextByte: Byte = {
+    if(bytes.isEmpty) {
+      val (ni, ns) = currentState.shift
+      currentState = ns
+      this.bytes = int2byteIt(ni)
+    }
+    bytes.next
   }
 }
 
