@@ -105,15 +105,15 @@ case class ScalaRandomBackedPRNG(seed: Long) extends PRNG {
   import utils._
   import scala.util.Random
 
-  val iterator = stream.iterator
+  val rng = new Random(seed)
+  private val bytes = Array.fill(1024)(0.toByte)
+  private var it: Iterator[Byte] = Iterator.empty
 
-  def nextByte = iterator.next()
-
-  private val stream = streamHelper(new Random(seed))
-
-  @inline private[this] def streamHelper(rng: Random): Stream[Byte] = {
-    val next = rng.nextInt
-    val (b1, b2, b3, b4) = int2bytes(next)
-    b1 #:: b2 #:: b3 #:: b4 #:: streamHelper(rng)
+  def nextByte = {
+    if(it.isEmpty) {
+      rng.nextBytes(bytes)
+      it = bytes.iterator
+    }
+    it.next
   }
 }
