@@ -79,41 +79,9 @@ case class PRNGStream[T](initialState: PRNGState[T]) {
   }
 }
 
-case class MutablePRNG[T](initialState: PRNGState[T]) extends PRNG {
-  import utils._
-
-  private var currentState = initialState
-  private var bytes: Iterator[Byte] = (Stream.empty.iterator)
-
-  def nextByte: Byte = {
-    if(bytes.isEmpty) {
-      val (ni, ns) = currentState.shift
-      currentState = ns
-      this.bytes = int2byteIt(ni)
-    }
-    bytes.next
-  }
-}
 
 case class StreamBackedPRNG[T](stream: PRNGStream[T]) extends PRNG {
   val iterator = stream.iterator
 
   def nextByte = iterator.next()
-}
-
-case class ScalaRandomBackedPRNG(seed: Long) extends PRNG {
-  import utils._
-  import scala.util.Random
-
-  val rng = new Random(seed)
-  private val bytes = Array.fill(1024)(0.toByte)
-  private var it: Iterator[Byte] = Iterator.empty
-
-  def nextByte = {
-    if(it.isEmpty) {
-      rng.nextBytes(bytes)
-      it = bytes.iterator
-    }
-    it.next
-  }
 }
