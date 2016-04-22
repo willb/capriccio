@@ -23,7 +23,7 @@ package com.freevariable.capriccio.mutable
 import com.freevariable.capriccio.{PRNG, PRNGState, utils}
 
 object Poisson {
-  @annotation.tailrec def arrivals(prng: PRNG, t: Double, z: Double, acc: Long=0L): Long = t match {
+  @annotation.tailrec private[this] def arrivals(prng: PRNG, t: Double, z: Double, acc: Long=0L): Long = t match {
     case _ if t > z => arrivals(prng, t * prng.nextDouble, z, acc + 1)
     case _ => acc
   }
