@@ -22,10 +22,10 @@ package com.freevariable.capriccio
 
 private [capriccio] object utils {
   def int2bytes(i: Int) = (
-    (i & 0xff).toByte,
-    (i >>> 8 & 0xff).toByte,
+    (i >>> 24 & 0xff).toByte,
     (i >>> 16 & 0xff).toByte,
-    (i >>> 24 & 0xff).toByte
+    (i >>> 8 & 0xff).toByte,
+    (i & 0xff).toByte
   )
 }
 
@@ -33,16 +33,16 @@ trait PRNG {
   def nextByte: Byte
 
   def nextInt = { 
-    (0 to 4).map(_ => nextByte).foldLeft(0) { (acc, b) => (acc << 8) | b }
+    ((0 to 3).map(_ => nextByte).foldLeft(0l) { (acc, b) => (acc << 8) | (b & 0xff) } & 0xfffffff).toInt
   }
 
   def nextLong = { 
-    (0 to 8).map(_ => nextByte).foldLeft(0l) { (acc, b) => (acc << 8) | b }
+    (0 to 7).map(_ => nextByte).foldLeft(0l) { (acc, b) => (acc << 8) | (b & 0xff) }
   }
 
-  def nextFloat = java.lang.Float.intBitsToFloat(nextInt)
+  def nextFloat = (nextInt & 0x00ffffff) / ((1 << 24).toFloat)
 
-  def nextDouble = java.lang.Double.longBitsToDouble(nextLong)  
+  def nextDouble = (((nextInt & 0x7ffffff).toLong << 27) + (nextInt & 0xfffffff)) / ((1L << 54).toDouble)
 
   def nextBoolean = ((nextByte & 1) == 1)
 }
