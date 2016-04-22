@@ -18,7 +18,7 @@
  * limitations under the License.
  */
 
-package com.freevariable.capriccio
+package com.freevariable.capriccio.immutable
 
 /**
  * On-line mean and variance estimates for a stream of Double values.
