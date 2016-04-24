@@ -60,6 +60,7 @@ trait PRNG {
 }
 
 trait PRNGState[T] {
+  type underlying = T
   def shift: (Int, PRNGState[T])
 }
 
@@ -74,8 +75,7 @@ case class PRNGStream[T](initialState: PRNGState[T]) {
   
   @inline private[this] def streamHelper(st: PRNGState[T]): Stream[Byte] = {
     val (next, nextState) = st.shift
-    val bit = int2byteIt(next)
-    bit.toStream ++ streamHelper(nextState)
+    int2byteIt(next).toStream ++ streamHelper(nextState)
   }
 }
 
