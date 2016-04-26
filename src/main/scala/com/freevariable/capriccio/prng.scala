@@ -28,11 +28,11 @@ private [capriccio] object utils {
     (i & 0xff).toByte
   )
 
-  @inline def int2byteStream(i: Int) =  {
+  def int2byteStream(i: Int, rest: => Stream[Byte] = Stream.empty) =  {
     (i >>> 24 & 0xff).toByte #::
     (i >>> 16 & 0xff).toByte #::
     (i >>> 8 & 0xff).toByte #::
-    (i & 0xff).toByte #:: Stream.empty
+    (i & 0xff).toByte #:: rest
   }
 
   @inline def int2byteIt(i: Int) =  {
@@ -66,16 +66,11 @@ trait PRNGState[T] {
 
 case class PRNGStream[T](initialState: PRNGState[T]) {
   import utils._
-  
-  val bytes: Stream[Byte] = {
-    streamHelper(initialState)
-  }
 
-  val iterator: Iterator[Byte] = bytes.iterator
+  val iterator: Iterator[Byte] = streamHelper(initialState).iterator
   
-  @inline private[this] def streamHelper(st: PRNGState[T]): Stream[Byte] = {
-    val (next, nextState) = st.shift
-    int2byteIt(next).toStream ++ streamHelper(nextState)
+  private[this] def streamHelper(st: PRNGState[T]): Stream[Byte] = {
+    int2byteStream(st.shift._1, streamHelper(st.shift._2))
   }
 }
 
